@@ -60,7 +60,7 @@ class Value extends ModelEntity
     private $id;
 
     /**
-     * @var
+     * @var int
      * @ORM\Column(name="element_id", type="integer", nullable=false)
      */
     private $elementId;
@@ -118,7 +118,7 @@ class Value extends ModelEntity
     }
 
     /**
-     * @return \Shopware\Models\Shop\Shop
+     * @return \Shopware\Models\Shop\Shop|null
      */
     public function getShop()
     {

@@ -4,6 +4,10 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
+    <imports>
+        <import resource="../HttpCache/services.xml"/>
+    </imports>
+
     <parameters>
         <parameter key="shopware.slug.config" type="collection">
             <parameter key="regexp">/([^A-Za-z0-9\.]|-)+/</parameter>
@@ -12,9 +16,11 @@
     </parameters>
 
     <services>
+        <defaults public="true" />
         <service id="application"     synthetic="true" />
         <service id="PasswordEncoder" synthetic="true" />
         <service id="db_connection"   synthetic="true" />
+        <service id="modules"         synthetic="true" />
 
         <service id="shopware.release" class="Shopware\Components\ShopwareReleaseStruct">
             <argument>%shopware.release.version%</argument>
@@ -60,6 +66,7 @@
             <argument type="service" id="shopware.escaper" />
             <argument>%shopware.template%</argument>
             <argument>%shopware.template_security%</argument>
+            <argument>%shopware.cache.backendOptions%</argument>
         </service>
 
         <service id="session_factory" class="Shopware\Components\DependencyInjection\Bridge\Session" />
@@ -77,7 +84,7 @@
         <service id="shopware.mail_transport" alias="MailTransport" />
         <service id="MailTransport" class="Zend_Mail_Transport_Abstract">
             <factory service="mailtransport_factory" method="factory" />
-            <argument type="service" id="Loader"/>
+            <argument type="service" id="loader"/>
             <argument type="service" id="config"/>
             <argument>%shopware.mail%</argument>
         </service>
@@ -101,7 +108,7 @@
         <service id="plugins" class="Enlight_Plugin_PluginManager">
             <factory service="plugins_factory" method="factory" />
             <argument type="service" id="service_container"/>
-            <argument type="service" id="Loader"/>
+            <argument type="service" id="loader"/>
             <argument type="service" id="events"/>
             <argument type="service" id="application"/>
             <argument>%shopware.plugin_directories%</argument>
@@ -111,10 +118,10 @@
         <service id="router" class="Shopware\Components\Routing\Router">
             <factory service="router_factory" method="factory" />
             <argument type="service" id="events"/>
-            <argument type="collection"/>
-            <argument type="collection"/>
-            <argument type="collection"/>
-            <argument type="collection"/>
+            <argument type="tagged" tag="router.matcher"/>
+            <argument type="tagged" tag="router.generator"/>
+            <argument type="tagged" tag="router.pre_filter"/>
+            <argument type="tagged" tag="router.post_filter"/>
         </service>
 
         <service id="dispatcher" class="Enlight_Controller_Dispatcher_Default" />
@@ -131,8 +138,8 @@
             <argument type="service" id="locale"/>
         </service>
 
-        <service id="shopware.loader" alias="Loader" />
-        <service id="Loader"     class="Enlight_Loader" />
+        <service id="shopware.loader" alias="loader" />
+        <service id="loader"     class="Enlight_Loader" />
         <service id="snippets"   class="Shopware_Components_Snippet_Manager">
             <argument type="service" id="shopware.model_manager"/>
             <argument>%shopware.plugin_directories%</argument>
@@ -156,7 +163,7 @@
         <service id="shopware.db" alias="db"/>
         <service id="db" class="Enlight_Components_Db_Adapter_Pdo_Mysql">
             <factory class="Shopware\Components\DependencyInjection\Bridge\Db" method="createEnlightDbAdapter" />
-            <argument type="service" id="dbal_connection"/>
+            <argument type="service" id="dbal_connection" />
             <argument>%shopware.db%</argument>
         </service>
 
@@ -194,15 +201,15 @@
         </service>
 
         <service id="shopware.hook_manager" alias="Hooks" />
-        <service id="Hooks" class="Enlight_Hook_HookManager">
+        <service id="hooks" class="Enlight_Hook_HookManager">
             <argument type="service" id="shopware.event_manager" />
             <argument type="service" id="shopware.loader" />
             <argument>%shopware.hook%</argument>
         </service>
 
-        <service id="shopware.model_config" alias="ModelConfig" />
-        <service id="ModelConfig" class="Shopware\Components\Model\Configuration">
-            <argument>%shopware.Model%</argument>
+        <service id="shopware.model_config" alias="modelconfig" />
+        <service id="modelconfig" class="Shopware\Components\Model\Configuration">
+            <argument>%shopware.model%</argument>
             <argument type="service" id="cache" />
             <argument type="service" id="model_repository_factory" />
             <argument type="service" id="shopware.release" />
@@ -240,33 +247,33 @@
             <argument>%kernel.root_dir%/engine/Shopware/Models</argument>
         </service>
 
-        <service id="model_event_manager" class="Doctrine\Common\EventManager" public="false" />
+        <service id="model_event_manager" class="Doctrine\Common\EventManager"/>
 
         <service id="model_repository_factory" class="Shopware\Components\Model\ProxyAwareRepositoryFactory" public="false">
             <argument type="service" id="Hooks" />
         </service>
 
-        <service id="EventSubscriber" class="Shopware\Components\Model\EventSubscriber" public="false">
+        <service id="eventsubscriber" class="Shopware\Components\Model\EventSubscriber">
             <argument type="service" id="shopware.event_manager" />
             <tag name="doctrine.event_subscriber" />
         </service>
 
-        <service id="OrderHistorySubscriber" class="Shopware\Models\Order\OrderHistorySubscriber" public="false">
+        <service id="orderhistorysubscriber" class="Shopware\Models\Order\OrderHistorySubscriber">
             <tag name="doctrine.event_subscriber" />
         </service>
 
-        <service id="CategorySubscriber" class="Shopware\Components\Model\CategorySubscriber">
+        <service id="categorysubscriber" class="Shopware\Components\Model\CategorySubscriber">
             <argument type="service" id="service_container" />
             <tag name="doctrine.event_subscriber" />
         </service>
 
-        <service id="CategoryDuplicator" class="Shopware\Components\CategoryHandling\CategoryDuplicator">
+        <service id="categoryduplicator" class="Shopware\Components\CategoryHandling\CategoryDuplicator">
             <argument type="service" id="db_connection" />
             <argument type="service" id="CategoryDenormalization" />
             <argument type="service" id="shopware_attribute.data_persister" />
         </service>
 
-        <service id="CategoryDenormalization" class="Shopware\Components\Model\CategoryDenormalization">
+        <service id="categorydenormalization" class="Shopware\Components\Model\CategoryDenormalization">
             <argument type="service" id="db_connection" />
         </service>
 
@@ -299,7 +306,7 @@
             <argument type="service" id="service_container" />
         </service>
 
-        <service id="MediaSubscriber" class="Shopware\Models\Media\MediaSubscriber" public="false">
+        <service id="mediasubscriber" class="Shopware\Models\Media\MediaSubscriber">
             <tag name="doctrine.event_subscriber" />
             <argument type="service" id="service_container" />
         </service>
@@ -312,7 +319,7 @@
 
         <service id="thumbnail_manager" class="Shopware\Components\Thumbnail\Manager">
             <argument type="service" id="thumbnail_generator_basic" />
-            <argument>%shopware.app.rootdir%</argument>
+            <argument>%shopware.app.rootDir%</argument>
             <argument type="service" id="events" />
             <argument type="service" id="shopware_media.media_service" />
         </service>
@@ -377,8 +384,15 @@
 
         <service id="legacy_event_manager" class="Shopware\Components\Compatibility\LegacyEventManager">
             <argument type="service" id="events" />
-            <argument type="service" id="config" />
             <argument type="service" id="shopware_storefront.context_service" />
+        </service>
+
+        <service id="legacy_documentid_converter" class="Shopware\Components\Compatibility\LegacyDocumentIdConverter">
+            <argument type="service" id="dbal_connection"/>
+        </service>
+
+        <service id="legacy_mysql8_migration_command" class="Shopware\Components\Compatibility\MigrateMysql8Command">
+            <tag name="console.command" command="sw:migrate:mysql8" />
         </service>
 
         <service id="query_alias_mapper" class="Shopware\Components\QueryAliasMapper">
@@ -392,12 +406,6 @@
             <argument type="service" id="shopware_plugininstaller.plugin_installer_struct_hydrator" />
             <argument type="service" id="shopware_plugininstaller.plugin_service_local" />
             <argument type="service" id="shopware_plugininstaller.store_client" />
-        </service>
-
-        <service id="http_cache_warmer" class="Shopware\Components\HttpCache\CacheWarmer">
-            <argument type="service" id="dbal_connection" />
-            <argument type="service" id="corelogger" />
-            <argument type="service" id="guzzle_http_client_factory" />
         </service>
 
         <service id="shop_page_menu" class="Shopware\Components\SitePageMenu">
@@ -430,6 +438,7 @@
             <argument type="service" id="shopware_search.store_front_criteria_factory" />
             <argument type="service" id="models" />
             <argument type="service" id="shopware_storefront.context_service"/>
+            <argument>%shopware.sitemap.batchsize%</argument>
         </service>
 
         <service id="AttributeSubscriber" class="Shopware\Components\AttributeSubscriber">
@@ -471,10 +480,7 @@
             <argument type="service" id="corelogger" />
         </service>
 
-        <service id="shopware_product_stream.facet_filter" class="Shopware\Components\ProductStream\FacetFilter" >
-            <argument type="service" id="config" />
-            <argument type="service" id="shopware_storefront.custom_facet_service" />
-        </service>
+        <service id="shopware_product_stream.facet_filter" class="Shopware\Components\ProductStream\FacetFilter" />
 
         <service id="shopware.upload_max_size_validator" class="Shopware\Components\UploadMaxSizeValidator">
             <tag name="shopware.event_subscriber" />
@@ -530,10 +536,6 @@
             <argument type="service" id="models" />
         </service>
 
-        <service id="shopware.http_cache.route_installer" class="Shopware\Components\HttpCache\CacheRouteInstaller">
-            <argument type="service" id="config_writer"/>
-        </service>
-
         <service id="basket_persister" class="Shopware\Components\BasketSignature\BasketPersister">
             <argument type="service" id="dbal_connection" />
         </service>
@@ -551,6 +553,16 @@
         </service>
 
         <service id="shopware.components.registration_cleanup_service" class="Shopware\Components\Register\RegistrationCleanupService" >
+            <argument type="service" id="config" />
+            <argument type="service" id="dbal_connection" />
+        </service>
+
+        <service id="optin_cleanup_cron_job_subscriber" class="Shopware\Components\Register\OptinCleanupSubscriber" >
+            <argument type="service" id="shopware.components.optin_cleanup_service" />
+            <tag name="shopware.event_subscriber" />
+        </service>
+
+        <service id="shopware.components.optin_cleanup_service" class="Shopware\Components\Register\OptinCleanupService" >
             <argument type="service" id="config" />
             <argument type="service" id="dbal_connection" />
         </service>
@@ -586,7 +598,7 @@
         </service>
 
         <service id="shopware.captcha.repository" class="Shopware\Components\Captcha\CaptchaRepository">
-            <argument type="collection" />
+            <argument type="tagged" tag="shopware.captcha" />
             <argument type="service" id="config" />
             <argument type="service" id="service_container" />
         </service>
@@ -628,6 +640,9 @@
             <argument id="shopware.customer_stream.criteria_factory" type="service"/>
         </service>
 
+        <!-- Necessary because of implementation in \Shopware\Components\Api\Manager::getResource() -->
+        <service id="shopware.api.customerstream" alias="shopware.api.customer_stream" />
+
         <service id="shopware.emotion.emotion_presetdata_transformer" class="Shopware\Components\Emotion\Preset\EmotionToPresetDataTransformer">
             <argument type="service" id="models" />
         </service>
@@ -637,7 +652,7 @@
             <argument type="service" id="shopware.emotion.preset_data_synchronizer" />
             <argument type="service" id="shopware.api.emotionpreset" />
             <argument type="service" id="shopware_media.media_service" />
-            <argument>%kernel.root_dir%</argument>
+            <argument>%shopware.app.rootDir%</argument>
             <argument type="service" id="dbal_connection" />
             <argument type="service" id="shopware.slug" />
         </service>
@@ -672,8 +687,8 @@
             <argument type="service" id="models" />
             <argument type="service" id="events" />
             <!--preset element handlers-->
-            <argument type="collection" />
-            <argument>%kernel.root_dir%</argument>
+            <argument type="tagged" tag="shopware.emotion.preset_component_handler" />
+            <argument>%shopware.app.rootDir%</argument>
         </service>
 
         <service id="shopware.emotion.preset_banner_component_handler" class="Shopware\Components\Emotion\Preset\ComponentHandler\BannerComponentHandler">
@@ -739,7 +754,6 @@
             <argument>false</argument>
             <argument>false</argument>
         </service>
-
 
         <service id="shopware.routing.matchers.rewrite_matcher" class="Shopware\Components\Routing\Matchers\RewriteMatcher">
             <argument type="service" id="dbal_connection"/>
@@ -810,5 +824,69 @@
         <service id="shopware.components.privacy.privacy_service" class="Shopware\Components\Privacy\PrivacyService">
             <argument id="dbal_connection" type="service"/>
         </service>
+
+        <service id="shopware.components.privacy.ip_anonymizer" class="Shopware\Components\Privacy\ConfigDependentIpAnonymizer">
+            <argument type="service" id="shopware.components.privacy.ip_anonymizer_service"/>
+            <argument type="service" id="config"/>
+        </service>
+
+        <service id="shopware.components.privacy.ip_anonymizer_service" class="Shopware\Components\Privacy\IpAnonymizer" public="false"/>
+
+        <service id="shopware.cart.proportional_tax_calculator"
+                 class="Shopware\Components\Cart\ProportionalTaxCalculator"/>
+
+        <service id="shopware.cart.basket_query_helper" class="Shopware\Components\Cart\BasketQueryHelper">
+            <argument type="service" id="dbal_connection"/>
+        </service>
+
+        <service id="shopware.cart.basket_helper" class="Shopware\Components\Cart\BasketHelper">
+            <argument type="service" id="shopware.cart.proportional_tax_calculator"/>
+            <argument type="service" id="shopware.cart.basket_query_helper" />
+        </service>
+
+        <service id="shopware.cart.proportional_cart_merger" class="Shopware\Components\Cart\ProportionalCartMerger">
+            <argument type="service" id="modules"/>
+        </service>
+
+        <!-- Filesystem -->
+        <service id="shopware.filesystem_factory" class="Shopware\Components\Filesystem\FilesystemFactory">
+            <argument type="tagged" tag="shopware_media.adapter" />
+        </service>
+
+        <service id="shopware.filesystem.public" class="League\Flysystem\FilesystemInterface">
+            <factory service="shopware.filesystem_factory" method="factory" />
+            <argument>%shopware.filesystem.public%</argument>
+        </service>
+
+        <service id="shopware.filesystem.public.url_generator" class="Shopware\Components\Filesystem\PublicUrlGenerator">
+            <argument type="service" id="service_container"/>
+            <argument>%shopware.app.rootDir%</argument>
+            <argument>%shopware.filesystem.public.config.root%</argument>
+            <argument>%shopware.filesystem.public.config.url%</argument>
+        </service>
+
+        <service id="shopware.filesystem.private" class="League\Flysystem\FilesystemInterface">
+            <factory service="shopware.filesystem_factory" method="factory" />
+            <argument>%shopware.filesystem.private%</argument>
+        </service>
+
+        <service id="shopware.components.privacy.cookie_remove_subscriber" class="Shopware\Components\Privacy\CookieRemoveSubscriber" >
+            <argument type="service" id="config"/>
+            <tag name="shopware.event_subscriber" />
+        </service>
+
+        <service id="shopware.esd.public.url_generator" class="Shopware\Components\Filesystem\PublicUrlGenerator">
+            <argument type="service" id="service_container"/>
+            <argument>%kernel.root_dir%</argument>
+            <argument>%shopware.filesystem.private.config.root%</argument>
+        </service>
+
+        <service id="shopware.components.state_translator" class="Shopware\Components\StateTranslatorService">
+            <argument type="service" id="snippets"/>
+        </service>
+
+        <service id="shopware.components.stream_protocol_validator" class="Shopware\Components\StreamProtocolValidator"/>
+
+        <service id="shopware.components.dispatch_format_helper" class="Shopware\Components\DispatchFormatHelper"/>
     </services>
 </container>

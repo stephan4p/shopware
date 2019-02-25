@@ -21,6 +21,7 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
+
 use Shopware\Bundle\SearchBundle\ProductSearchInterface;
 use Shopware\Bundle\SearchBundle\ProductSearchResult;
 use Shopware\Bundle\StoreFrontBundle\Service\ContextServiceInterface;
@@ -56,7 +57,7 @@ class Shopware_Controllers_Widgets_Listing extends Enlight_Controller_Action
                 $this->Request()->setParam('sSort', $default);
             }
 
-            /** @var $articleModule \sArticles */
+            /** @var \sArticles $articleModule */
             $articleModule = Shopware()->Modules()->Articles();
             $navigation = $articleModule->getProductNavigation($orderNumber, $categoryId, $this->Request());
 
@@ -126,8 +127,13 @@ class Shopware_Controllers_Widgets_Listing extends Enlight_Controller_Action
 
         $convertedProducts = $this->container->get('legacy_struct_converter')->convertListProductStructList($products);
 
-        $this->View()->assign(['sArticles' => $convertedProducts, 'articles' => $convertedProducts]);
+        /*
+         * @Deprecated
+         * The assignment of all request parameters to the view below is deprecated
+         * and about to be removed in 5.6
+         */
         $this->View()->assign($this->Request()->getParams());
+        $this->View()->assign(['sArticles' => $convertedProducts, 'articles' => $convertedProducts]);
     }
 
     public function streamAction()
@@ -155,9 +161,13 @@ class Shopware_Controllers_Widgets_Listing extends Enlight_Controller_Action
 
         $convertedProducts = $this->container->get('legacy_struct_converter')
             ->convertListProductStructList($products->getProducts());
-
-        $this->View()->assign(['sArticles' => $convertedProducts, 'articles' => $convertedProducts]);
+        /*
+         * @Deprecated
+         * The assignment of all request parameters to the view below is deprecated
+         * and about to be removed in 5.6
+         */
         $this->View()->assign($this->Request()->getParams());
+        $this->View()->assign(['sArticles' => $convertedProducts, 'articles' => $convertedProducts]);
     }
 
     /**
@@ -194,10 +204,15 @@ class Shopware_Controllers_Widgets_Listing extends Enlight_Controller_Action
         }
 
         $categoryId = (int) $this->Request()->getParam('sCategory');
-        $productStreamId = $this->findStreamIdByCategoryId($categoryId);
 
-        if ($productStreamId) {
-            $result = $this->fetchStreamListing($categoryId, $productStreamId);
+        $context = $this->container->get('shopware_storefront.context_service')->getShopContext();
+
+        $category = $this->container->get('shopware_storefront.category_gateway')->get([$categoryId], $context);
+
+        $productStream = $category->getProductStream();
+
+        if ($productStream) {
+            $result = $this->fetchStreamListing($categoryId, $productStream->getId());
             $this->setSearchResultResponse($result);
 
             return;
@@ -225,7 +240,7 @@ class Shopware_Controllers_Widgets_Listing extends Enlight_Controller_Action
     public function getCustomPageAction()
     {
         $pageId = (int) $this->Request()->getParam('pageId', 0);
-        $groupKey = $this->Request()->getParam('groupKey', 'gLeft');
+        $groupKey = $this->Request()->getParam('groupKey', 'left');
 
         $customPage = Shopware()->Modules()->Cms()->sGetStaticPageChildrensById($pageId, $groupKey);
 
@@ -280,25 +295,6 @@ class Shopware_Controllers_Widgets_Listing extends Enlight_Controller_Action
             ->setParameter(':parentId', $categoryId);
 
         return $query->execute()->fetchAll(PDO::FETCH_COLUMN);
-    }
-
-    /**
-     * @param int $categoryId
-     *
-     * @return int|null
-     */
-    private function findStreamIdByCategoryId($categoryId)
-    {
-        $streamId = $this->get('dbal_connection')->fetchColumn(
-            'SELECT stream_id FROM s_categories WHERE id = :id',
-            ['id' => $categoryId]
-        );
-
-        if ($streamId) {
-            return (int) $streamId;
-        }
-
-        return null;
     }
 
     /**
@@ -521,7 +517,7 @@ class Shopware_Controllers_Widgets_Listing extends Enlight_Controller_Action
 
     /**
      * @param ProductSearchResult $result
-     * @param null|int            $categoryId
+     * @param int|null            $categoryId
      *
      * @return array
      */

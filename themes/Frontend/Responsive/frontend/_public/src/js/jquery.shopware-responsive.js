@@ -106,6 +106,9 @@
         .addPlugin('.is--ctl-detail', 'swJumpToTab')
         .addPlugin('*[data-ajax-shipping-payment="true"]', 'swShippingPayment')
 
+        // Jump to ToS-Checkbox on invalid
+        .addPlugin('*[data-invalid-tos-jump="true"]', 'swInvalidTosJump')
+
         // Initialize the registration plugin
         .addPlugin('div[data-register="true"]', 'swRegister')
         .addPlugin('*[data-last-seen-products="true"]', 'swLastSeenProducts', $.extend({}, window.lastSeenProductsConfig))
@@ -198,14 +201,14 @@
                 url: ajaxCartRefresh,
                 dataType: 'json',
                 success: function (cart) {
-                    if (!cart.amount || !cart.quantity) {
+                    if (!cart.amount || isNaN(cart.quantity)) {
                         return;
                     }
 
                     $cartAmount.html(cart.amount);
                     $cartQuantity.html(cart.quantity).removeClass('is--hidden');
 
-                    if (cart.quantity == 0) {
+                    if (cart.quantity === 0) {
                         $cartQuantity.addClass('is--hidden');
                     }
 

@@ -83,7 +83,7 @@ class ShippingFreeFacetHandler implements HandlerInterface, ResultHydratorInterf
         $aggregation->setField('shippingFree');
 
         $filterAgg = new FilterAggregation('shipping_free_filter');
-        $filterAgg->setFilter(new TermQuery('shippingFree', 1));
+        $filterAgg->setFilter(new TermQuery('shippingFree', true));
         $filterAgg->addAggregation($aggregation);
 
         $search->addAggregation($filterAgg);
@@ -127,7 +127,7 @@ class ShippingFreeFacetHandler implements HandlerInterface, ResultHydratorInterf
             $fieldName = 'shippingFree';
         }
 
-        /** @var ShippingFreeFacet $facet */
+        /** @var ShippingFreeFacet|null $facet */
         $facet = $criteria->getFacet('shipping_free');
         if ($facet && !empty($facet->getLabel())) {
             $label = $facet->getLabel();

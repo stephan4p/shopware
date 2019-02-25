@@ -64,17 +64,15 @@ abstract class AbstractComponentHandler implements ComponentHandlerInterface
     {
         $media = $this->mediaResource->internalCreateMediaByFileLink($assetPath, $albumId);
 
-        if ($media) {
-            $this->mediaResource->getManager()->flush($media);
-        }
+        $this->mediaResource->getManager()->flush($media);
 
         return $media;
     }
 
     /**
-     * @param $id
+     * @param int $id
      *
-     * @return null|object
+     * @return object|null
      */
     protected function getMediaById($id)
     {
@@ -82,9 +80,9 @@ abstract class AbstractComponentHandler implements ComponentHandlerInterface
     }
 
     /**
-     * @param $path
+     * @param string $path
      *
-     * @return null|object
+     * @return object|null
      */
     protected function getMediaByPath($path)
     {

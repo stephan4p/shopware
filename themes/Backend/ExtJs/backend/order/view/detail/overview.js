@@ -95,6 +95,7 @@ Ext.define('Shopware.apps.Order.view.detail.Overview', {
             trackingCode: '{s name=overview/edit/tracking_code}Tracking code{/s}',
             shippingCost: '{s name=overview/edit/shipping_cost}Shipping costs ([0]){/s}',
             shippingCostNet: '{s name=overview/edit/shipping_cost_net}Shipping costs net ([0]){/s}',
+            shippingTaxRate: '{s name=overview/edit/shipping_tax_rate}Shipping tax rate{/s}',
             orderState: '{s name=overview/edit/order_status}Order status{/s}',
             paymentState: '{s name=overview/edit/payment_status}Payment status{/s}'
         },
@@ -115,7 +116,8 @@ Ext.define('Shopware.apps.Order.view.detail.Overview', {
             partnerId: '{s name=overview/details/partner_id}Partner ID{/s}',
             changed: '{s name=overview/details/changed}Last changed{/s}'
         },
-        customerDeleted: '{s name=overview/details/customer_deleted_text}Caution: The assigned customer has been deleted.{/s}'
+        customerDeleted: '{s name=overview/details/customer_deleted_text}Caution: The assigned customer has been deleted.{/s}',
+        openCustomer: '{s name=overview/details/open_customer}Open customer{/s}'
     },
 
     /**
@@ -523,6 +525,7 @@ Ext.define('Shopware.apps.Order.view.detail.Overview', {
 
         me.detailsForm = Ext.create('Ext.form.Panel', {
             title: me.snippets.details.title,
+            titleAlign: 'left',
             bodyPadding: 10,
             layout: 'anchor',
             defaults: {
@@ -634,8 +637,30 @@ Ext.define('Shopware.apps.Order.view.detail.Overview', {
             { name: 'referer', fieldLabel: me.snippets.details.referer},
             { name: 'remoteAddressConverted', fieldLabel: me.snippets.details.remoteAddress},
             { name: 'deviceTypeHuman', fieldLabel: me.snippets.details.deviceType},
-            { name: 'changed', fieldLabel: me.snippets.details.changed}
+            { name: 'changed', fieldLabel: me.snippets.details.changed},
+            me.createCustomerButton()
         ];
+    },
+
+    /**
+     * Adds a link to the customer that placed the order
+     *
+     * @returns Ext.Button
+     */
+    createCustomerButton: function() {
+        var me = this;
+        return {
+            disabled: !me.record.getCustomer().first(),
+            action:'openCustomer',
+            xtype: 'button',
+            cls: 'primary',
+            text: me.snippets.openCustomer,
+            margin: '10 0 0 0',
+            handler: function () {
+                me.fireEvent('openCustomer', me.record);
+            }
+        }
+
     },
 
     /**
@@ -748,6 +773,14 @@ Ext.define('Shopware.apps.Order.view.detail.Overview', {
                 fieldLabel: Ext.String.format(me.snippets.edit.shippingCostNet, me.record.get('currency'))
             },
             {
+                xtype: 'numberfield',
+                decimalPrecision: 2,
+                submitLocaleSeparator: false,
+                name: 'invoiceShippingTaxRate',
+                disabled: me.record.get('isProportionalCalculation'),
+                fieldLabel: me.snippets.edit.shippingTaxRate
+            },
+            {
                 xtype: 'combobox',
                 queryMode: 'local',
                 name: 'status',
@@ -765,10 +798,6 @@ Ext.define('Shopware.apps.Order.view.detail.Overview', {
                 store: me.paymentStatusStore,
                 displayField: 'description',
                 valueField: 'id'
-            },
-            {
-                xtype: 'hiddenfield',
-                name: 'changed'
             }
         ];
     },

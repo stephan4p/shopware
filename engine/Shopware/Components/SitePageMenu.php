@@ -27,7 +27,6 @@ namespace Shopware\Components;
 use Doctrine\DBAL\Connection;
 use Shopware\Bundle\StoreFrontBundle\Gateway\DBAL\FieldHelper;
 use Shopware\Bundle\StoreFrontBundle\Service\ContextServiceInterface;
-use Shopware\Components\Routing\Router;
 use Shopware\Components\Routing\RouterInterface;
 
 /**
@@ -72,8 +71,8 @@ class SitePageMenu
     /**
      * Returns a shop page tree for the provided shop id.
      *
-     * @param $shopId
-     * @param $activeId
+     * @param int $shopId
+     * @param int $activeId
      *
      * @return array
      */
@@ -81,7 +80,7 @@ class SitePageMenu
     {
         $query = $this->getQuery($shopId);
 
-        /** @var $statement \PDOStatement */
+        /** @var \PDOStatement $statement */
         $statement = $query->execute();
 
         $data = $statement->fetchAll(\PDO::FETCH_ASSOC);
@@ -159,7 +158,6 @@ class SitePageMenu
             $menu[$key][] = $site;
         }
 
-        /** @var Router $router */
         $seoUrls = $this->router->generateList($links);
         $menu = $this->assignSeoUrls($menu, $seoUrls);
 
@@ -176,9 +174,9 @@ class SitePageMenu
      * Checks if the provided menu contains already an entry for the provided site.
      * If the provided site contains a mapping but the existing not, override the existing.
      *
-     * @param $menu
-     * @param $key
-     * @param $site
+     * @param array  $menu
+     * @param string $key
+     * @param array  $site
      *
      * @return bool
      */
@@ -188,9 +186,9 @@ class SitePageMenu
     }
 
     /**
-     * @param $parentId
-     * @param $sites
-     * @param $activeId
+     * @param int   $parentId
+     * @param array $sites
+     * @param int   $activeId
      *
      * @return array
      */
@@ -249,19 +247,19 @@ class SitePageMenu
         $query->leftJoin(
             'page',
             's_cms_static_groups',
-            'groups',
+            '`groups`',
             'groups.active = 1'
         );
 
         $query->leftJoin(
-            'groups',
+            '`groups`',
             's_cms_static_groups',
             'mapping',
             'groups.mapping_id = mapping.id'
         );
 
         $query->leftJoin(
-            'groups',
+            '`groups`',
             's_core_shop_pages',
             'shops',
             'groups.id = shops.group_id AND shops.shop_id = :shopId'

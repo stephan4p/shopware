@@ -77,11 +77,11 @@ class OpenSSLEncryption
         $encryptedMessage = openssl_encrypt($data, $encryptionMethod, $key, false, $iv);
 
         $encryptedKey = '';
-        if (!true === openssl_public_encrypt($key, $encryptedKey, $publicKey)) {
+        if (!openssl_public_encrypt($key, $encryptedKey, $publicKey)) {
             $errors = [];
             while ($errors[] = openssl_error_string());
             $errorString = implode("\n", $errors);
-            throw new \Exception('Got openssl error' . $errorString);
+            throw new \Exception(sprintf('Got openssl error %s', $errorString));
         }
 
         $result = [

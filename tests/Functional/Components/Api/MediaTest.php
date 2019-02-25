@@ -27,7 +27,7 @@ namespace Shopware\Tests\Functional\Components\Api;
 use Shopware\Components\Api\Resource\Media;
 
 /**
- * @category  Shopware
+ * @category Shopware
  *
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
@@ -69,6 +69,8 @@ class MediaTest extends TestCase
         //check if the thumbnails are generated
         $path = Shopware()->DocPath('media_image_thumbnail') . 'test-bild-used_140x140.jpg';
         $this->assertTrue($mediaService->has($path));
+
+        unlink($dest);
     }
 
     public function testUploadNameWithOver50Characters()
@@ -94,6 +96,31 @@ class MediaTest extends TestCase
 
         $mediaService->delete(Shopware()->DocPath('media_image') . $media->getFileName());
         $mediaService->delete($path);
+
+        unlink($dest);
+    }
+
+    public function testSubmittedNameIsUsed()
+    {
+        $data = $this->getExtendedTestData();
+        $base64Data = base64_encode(file_get_contents(__DIR__ . '/fixtures/shopware_logo.png'));
+        $data['file'] = 'data:image/png;base64,' . $base64Data;
+        $ids = [];
+
+        // Assert that the given name is used
+        $media = $this->resource->create($data);
+        $ids[] = $media->getId();
+        $this->assertEquals($data['name'], $media->getName());
+
+        // On the second pass the given name should still be used (extended with a random string)
+        $media = $this->resource->create($data);
+        $ids[] = $media->getId();
+        $this->assertContains($data['name'], $media->getName());
+
+        // Delete the created media
+        foreach ($ids as $id) {
+            $this->resource->delete($id);
+        }
     }
 
     public function testReplaceMedia()
@@ -151,6 +178,8 @@ class MediaTest extends TestCase
         }
 
         $this->resource->create($data);
+
+        unlink($dest);
     }
 
     protected function getSimpleTestData()
@@ -159,5 +188,13 @@ class MediaTest extends TestCase
             'album' => -1,
             'description' => 'Test description',
         ];
+    }
+
+    protected function getExtendedTestData()
+    {
+        $temp = $this->getSimpleTestData();
+        $temp['name'] = 'some-name-lorem-ipsum';
+
+        return $temp;
     }
 }

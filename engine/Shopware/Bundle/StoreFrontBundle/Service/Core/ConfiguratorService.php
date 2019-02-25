@@ -29,7 +29,7 @@ use Shopware\Bundle\StoreFrontBundle\Service;
 use Shopware\Bundle\StoreFrontBundle\Struct;
 
 /**
- * @category  Shopware
+ * @category Shopware
  *
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
@@ -91,7 +91,7 @@ class ConfiguratorService implements Service\ConfiguratorServiceInterface
         $combinations = $this->configuratorGateway->getProductCombinations($product);
 
         $media = [];
-        if ($configurator->getType() === self::CONFIGURATOR_TYPE_PICTURE) {
+        if (((int) $configurator->getType()) === self::CONFIGURATOR_TYPE_PICTURE) {
             $media = $this->configuratorGateway->getConfiguratorMedia(
                 $product,
                 $context
@@ -139,7 +139,7 @@ class ConfiguratorService implements Service\ConfiguratorServiceInterface
      *
      * @param \Shopware\Bundle\StoreFrontBundle\Struct\Configurator\Group $group
      * @param array                                                       $combinations
-     * @param $selection
+     * @param array                                                       $selection
      *
      * @return bool
      */

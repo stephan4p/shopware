@@ -76,7 +76,7 @@ class Basic implements GeneratorInterface
     public function createThumbnail($imagePath, $destination, $maxWidth, $maxHeight, $keepProportions = false, $quality = 90)
     {
         if (!$this->mediaService->has($imagePath)) {
-            throw new \Exception('File not found: ' . $imagePath);
+            throw new \Exception(sprintf('File not found: %s', $imagePath));
         }
 
         $content = $this->mediaService->read($imagePath);
@@ -134,6 +134,7 @@ class Basic implements GeneratorInterface
      * method for the image extension
      *
      * @param string $fileContent
+     * @param string $imagePath
      *
      * @throws \RuntimeException
      *
@@ -151,7 +152,7 @@ class Basic implements GeneratorInterface
     /**
      * Returns the extension of the file with passed path
      *
-     * @param string
+     * @param string $path
      *
      * @return string
      */
@@ -223,9 +224,9 @@ class Basic implements GeneratorInterface
             // Disables blending
             imagealphablending($newImage, false);
         }
-        // Saves the alpha informations
+        // Saves the alpha information
         imagesavealpha($newImage, true);
-        // Copies the original image into the new created image with resampling
+        // Copies the original image into the new created image with re-sampling
         imagecopyresampled(
             $newImage,
             $image,
@@ -305,8 +306,9 @@ class Basic implements GeneratorInterface
             $this->uploadImage($destination, $tmpFilename);
         } catch (OptimizerNotFoundException $exception) {
             // empty catch intended since no optimizer is available
+        } finally {
+            unlink($tmpFilename);
         }
-        unlink($tmpFilename);
     }
 
     /**

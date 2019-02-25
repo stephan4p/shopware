@@ -25,7 +25,7 @@
 namespace Shopware\Bundle\StoreFrontBundle\Gateway\DBAL\Hydrator;
 
 /**
- * @category  Shopware
+ * @category Shopware
  *
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
@@ -106,11 +106,11 @@ class Hydrator
     }
 
     /**
-     * @param array  $data
-     * @param string $prefix
-     * @param array  $mapping
-     * @param null   $id        used for `merged` translations
-     * @param bool   $addPrefix
+     * @param array       $data
+     * @param string|null $prefix
+     * @param array       $mapping
+     * @param int|null    $id        used for `merged` translations
+     * @param bool        $addPrefix
      *
      * @return array
      */
@@ -143,7 +143,7 @@ class Hydrator
     /**
      * @param array    $data
      * @param string   $key
-     * @param null|int $id
+     * @param int|null $id
      *
      * @return array
      */

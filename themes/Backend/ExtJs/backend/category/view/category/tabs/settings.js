@@ -405,7 +405,8 @@ Ext.define('Shopware.apps.Category.view.category.tabs.Settings', {
 
         me.streamSelection = Ext.create('Shopware.form.field.ProductStreamSelection', {
             name: 'streamId',
-            labelWidth: 155
+            labelWidth: 155,
+            translatable: true
         });
 
         return [
@@ -427,7 +428,12 @@ Ext.define('Shopware.apps.Category.view.category.tabs.Settings', {
                     {
                         boxLabel:me.snippets.defaultSettingsBlogLabel,
                         name:'blog',
-                        dataIndex:'blog'
+                        dataIndex:'blog',
+                        listeners: {
+                            change: function (element, value) {
+                                me.shopSelector.setDisabled(!value)
+                            }
+                        }
                     }
                 ]
             },
@@ -447,7 +453,9 @@ Ext.define('Shopware.apps.Category.view.category.tabs.Settings', {
                 fieldLabel:me.snippets.defaultSettingsLinkExternalPageLabel,
                 helpText:me.snippets.defaultSettingsLinkExternalPageHelp,
                 dataIndex:'external',
-                name:'external'
+                name:'external',
+                translatable: true,
+                translationName: 'external',
             },
             {
                 fieldLabel: me.snippets.defaultSettingsLinkExternalPageTarget,
@@ -466,20 +474,24 @@ Ext.define('Shopware.apps.Category.view.category.tabs.Settings', {
                         { externalTarget: me.snippets.defaultSettingsLinkExternalPageTargetSelf },
                         { externalTarget: me.snippets.defaultSettingsLinkExternalPageTargetBlank }
                     ]
-                })
+                }),
+                translatable: true,
+                translationName: 'externalTarget'
             },
             {
-                xtype:'mediaselectionfield',
+                xtype:'shopware-media-field',
                 fieldLabel:me.snippets.defaultSettingsImageLabel,
                 buttonText:me.snippets.defaultSettingsImageButtonText,
                 name:'imagePath',
                 readOnly:false,
-                valueField:'virtualPath',
+                valueField:'id',
                 supportText:me.snippets.defaultSettingsImageSupportText,
                 multiSelect:false,
                 anchor:'100%',
+                removeBackground: true,
                 validTypes:me.getAllowedExtensions(),
-                validTypeErrorFunction:me.getExtensionErrorCallback()
+                validTypeErrorFunction:me.getExtensionErrorCallback(),
+                translatable: true,
             },
             {
                 xtype:'checkboxgroup',
@@ -491,8 +503,34 @@ Ext.define('Shopware.apps.Category.view.category.tabs.Settings', {
                     uncheckedValue:false
                 }, me.defaults),
                 items: me.getSettingsCheckboxes()
-            }
+            },
+            me.getShopSelector()
         ];
+    },
+
+    /**
+     * Returns the shop selector
+     *
+     * @return { Shopware.form.field.ShopGrid }
+     */
+    getShopSelector: function () {
+        var selectionFactory = Ext.create('Shopware.attribute.SelectionFactory');
+
+        this.on('recordloaded', function (record) {
+            this.shopSelector.setDisabled(!record.get('blog'));
+        });
+
+        return this.shopSelector = Ext.create('Shopware.form.field.ShopGrid', {
+            name: 'shops',
+            fieldLabel: '{s name=label_shop}Limit to shop(s){/s}',
+            helpText: '{s name=shop_helper}Limit page visibility to the following shops. If left empty, page will be accessible in all shops.{/s}',
+            editable: false,
+            allowSorting: false,
+            height: 130,
+            labelWidth: 155,
+            store: selectionFactory.createEntitySearchStore('Shopware\\Models\\Shop\\Shop'),
+            searchStore: selectionFactory.createEntitySearchStore('Shopware\\Models\\Shop\\Shop'),
+        });
     },
 
     /**
@@ -626,7 +664,7 @@ Ext.define('Shopware.apps.Category.view.category.tabs.Settings', {
      * @return array of strings
      */
     getAllowedExtensions : function() {
-        return [ 'gif', 'png', 'jpeg', 'jpg' ]
+        return [ 'gif', 'png', 'jpeg', 'jpg', 'svg' ]
     }
 });
 //{/block}

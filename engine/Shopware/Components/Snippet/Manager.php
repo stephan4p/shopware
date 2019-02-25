@@ -21,6 +21,7 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
+
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Snippet\DbAdapter;
 use Shopware\Models\Plugin\Plugin;
@@ -28,7 +29,7 @@ use Shopware\Models\Shop\Locale;
 use Shopware\Models\Shop\Shop;
 
 /**
- * @category  Shopware
+ * @category Shopware
  *
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
@@ -45,17 +46,17 @@ class Shopware_Components_Snippet_Manager extends Enlight_Components_Snippet_Man
     protected $snippetConfig;
 
     /**
-     * @var Shopware\Models\Shop\Locale
+     * @var Shopware\Models\Shop\Locale|null
      */
     protected $locale;
 
     /**
-     * @var Shopware\Models\Shop\Shop
+     * @var Shopware\Models\Shop\Shop|null
      */
     protected $shop;
 
     /**
-     * @var Enlight_Config_Adapter_File
+     * @var Enlight_Config_Adapter_File|null
      */
     protected $fileAdapter;
 
@@ -70,7 +71,7 @@ class Shopware_Components_Snippet_Manager extends Enlight_Components_Snippet_Man
     private $pluginDirectories;
 
     /**
-     * @var Locale
+     * @var Locale|null
      */
     private $fallbackLocale;
 
@@ -86,7 +87,10 @@ class Shopware_Components_Snippet_Manager extends Enlight_Components_Snippet_Man
         $this->pluginDirectories = $pluginDirectories;
 
         $repository = $this->modelManager->getRepository(Locale::class);
-        $this->fallbackLocale = $repository->findOneBy(['locale' => 'en_GB']);
+
+        /** @var \Shopware\Models\Shop\Locale $fallbackLocale */
+        $fallbackLocale = $repository->findOneBy(['locale' => 'en_GB']);
+        $this->fallbackLocale = $fallbackLocale;
 
         if ($this->snippetConfig['readFromIni']) {
             $configDir = $this->getConfigDirs();
@@ -177,7 +181,21 @@ class Shopware_Components_Snippet_Manager extends Enlight_Components_Snippet_Man
     }
 
     /**
-     * @param   $dir
+     * Resets the currently set shop of the SnippetManager
+     *
+     * @return Shopware_Components_Snippet_Manager
+     */
+    public function resetShop()
+    {
+        $this->shop = null;
+        $this->namespaces = [];
+        $this->extends = [];
+
+        return $this;
+    }
+
+    /**
+     * @param string $dir
      *
      * @return Shopware_Components_Snippet_Manager
      */
@@ -285,7 +303,7 @@ class Shopware_Components_Snippet_Manager extends Enlight_Components_Snippet_Man
                     $pluginThemePath
                 );
 
-                /** @var $directory \DirectoryIterator */
+                /** @var \DirectoryIterator $directory */
                 foreach ($directories as $directory) {
                     //check valid directory
                     if ($directory->isDot() || !$directory->isDir() || $directory->getFilename() === '_cache') {

@@ -41,7 +41,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 /**
  * Global Manager which is responsible for initializing the adapter classes.
  *
- * @category  Shopware
+ * @category Shopware
  *
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
@@ -89,7 +89,7 @@ class ModelManager extends EntityManager
     /**
      * Serialize an entity or an array of entities to an array
      *
-     * @param   $entity
+     * @param array|\Traversable $entity
      *
      * @return array
      */
@@ -159,7 +159,7 @@ class ModelManager extends EntityManager
     }
 
     /**
-     * @param $object
+     * @param object $object
      *
      * @return ConstraintViolationListInterface
      */
@@ -182,7 +182,7 @@ class ModelManager extends EntityManager
     /**
      * Generates Doctrine proxy classes
      *
-     * @param array $tableNames
+     * @param string[] $tableNames
      */
     public function regenerateAttributeProxies($tableNames = [])
     {
@@ -196,7 +196,7 @@ class ModelManager extends EntityManager
         $proxyFactory = $this->getProxyFactory();
 
         $attributeMetaData = [];
-        /** @var $metaData \Doctrine\ORM\Mapping\ClassMetadata */
+        /** @var \Doctrine\ORM\Mapping\ClassMetadata $metaData */
         foreach ($allMetaData as $metaData) {
             $tableName = $metaData->getTableName();
             if (strpos($tableName, '_attributes') === false) {
@@ -223,10 +223,10 @@ class ModelManager extends EntityManager
     /**
      * Helper function to add mysql specified command to increase the sql performance.
      *
-     * @param Query $query
-     * @param null  $index        Name of the forced index
-     * @param bool  $straightJoin true or false. Allow to add STRAIGHT_JOIN select condition
-     * @param bool  $sqlNoCache
+     * @param Query      $query
+     * @param mixed|null $index        Name of the forced index
+     * @param bool       $straightJoin true or false. Allow to add STRAIGHT_JOIN select condition
+     * @param bool       $sqlNoCache
      *
      * @return Query
      */
@@ -299,7 +299,7 @@ class ModelManager extends EntityManager
      * @see        http://borisguery.github.com/bgylibrary
      * @see         https://gist.github.com/1034079#file_serializable_entity.php
      *
-     * @param   $entity
+     * @param object|null $entity
      *
      * @return array
      */
@@ -310,7 +310,7 @@ class ModelManager extends EntityManager
         }
 
         if ($entity instanceof \Doctrine\ORM\Proxy\Proxy) {
-            /* @var $entity \Doctrine\ORM\Proxy\Proxy */
+            /* @var \Doctrine\ORM\Proxy\Proxy $entity */
             $entity->__load();
             $className = get_parent_class($entity);
         } else {

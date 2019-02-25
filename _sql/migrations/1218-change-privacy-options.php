@@ -21,6 +21,7 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
+
 class Migrations_Migration1218 extends Shopware\Components\Migrations\AbstractMigration
 {
     public function up($modus)
@@ -35,7 +36,7 @@ class Migrations_Migration1218 extends Shopware\Components\Migrations\AbstractMi
                 VALUES (@formId, '2', 'Privacy');";
         $this->addSql($sql);
 
-        // Change serveral element categories to the new privacy-category
+        // Change several element categories to the new privacy-category
         $sql = "UPDATE `s_core_config_elements`
                 SET form_id = @formId, position = '10'
                 WHERE name IN ('ignoreagb', 'actdprcheck', 'newsletterextendedfields', 'optinnewsletter', 'optinvote', 'sendRegisterConfirmation', 'show_cookie_note', 'data_privacy_statement_link')";
@@ -54,7 +55,7 @@ class Migrations_Migration1218 extends Shopware\Components\Migrations\AbstractMi
 
         $sql = "UPDATE `s_core_config_element_translations`
                 SET label = 'Link to the data privacy statement for cookies'
-                WHERE element_id = ( SELECT id FROM `s_core_config_elements` WHERE name = 'data_privacy_statement_link' LIMIT 1 )";
+                WHERE element_id = ( SELECT id FROM `s_core_config_elements` WHERE name = 'data_privacy_statement_link' LIMIT 1 ) and locale_id = 2";
         $this->addSql($sql);
 
         // Move the ACTDPR-Elements together

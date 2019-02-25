@@ -26,7 +26,7 @@ namespace Shopware\Bundle\ESIndexingBundle\Product;
 
 use Doctrine\DBAL\Connection;
 use Shopware\Bundle\ESIndexingBundle\LastIdQuery;
-use Shopware\Bundle\SearchBundleDBAL\VariantHelper;
+use Shopware\Bundle\SearchBundleDBAL\VariantHelperInterface;
 
 /**
  * Class ProductQueryFactory
@@ -40,10 +40,10 @@ class ProductQueryFactory implements ProductQueryFactoryInterface
     private $variantHelper;
 
     /**
-     * @param Connection    $connection
-     * @param VariantHelper $variantHelper
+     * @param Connection             $connection
+     * @param VariantHelperInterface $variantHelper
      */
-    public function __construct(Connection $connection, VariantHelper $variantHelper)
+    public function __construct(Connection $connection, VariantHelperInterface $variantHelper)
     {
         $this->connection = $connection;
         $this->variantHelper = $variantHelper;
@@ -206,7 +206,7 @@ class ProductQueryFactory implements ProductQueryFactoryInterface
     }
 
     /**
-     * @param null|int $limit
+     * @param int|null $limit
      *
      * @return \Doctrine\DBAL\Query\QueryBuilder
      */

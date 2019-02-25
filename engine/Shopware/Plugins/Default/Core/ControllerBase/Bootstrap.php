@@ -67,6 +67,12 @@ class Shopware_Plugins_Core_ControllerBase_Bootstrap extends Shopware_Components
 
         $shop = Shopware()->Shop();
         $view->Controller = $args->getSubject()->Request()->getControllerName();
+
+        /*
+         * @deprecated
+         *
+         * This assignment is deprecated and will be removed in Shopware 5.6 without replacement
+         */
         $view->Shopware = Shopware();
 
         $view->sBasketQuantity = $view->sBasketQuantity ?: 0;
@@ -104,7 +110,7 @@ class Shopware_Plugins_Core_ControllerBase_Bootstrap extends Shopware_Components
     /**
      * Returns current category id
      *
-     * @param $default
+     * @param int $default
      *
      * @return int
      */
@@ -122,7 +128,7 @@ class Shopware_Plugins_Core_ControllerBase_Bootstrap extends Shopware_Components
     /**
      * Return current categories
      *
-     * @param $parentId
+     * @param int $parentId
      *
      * @return array
      */
@@ -134,8 +140,8 @@ class Shopware_Plugins_Core_ControllerBase_Bootstrap extends Shopware_Components
     /**
      * Return cms menu items
      *
-     * @param null|int $shopId
-     * @param null|int $activePageId
+     * @param int|null $shopId
+     * @param int|null $activePageId
      *
      * @return array
      */
@@ -155,7 +161,7 @@ class Shopware_Plugins_Core_ControllerBase_Bootstrap extends Shopware_Components
     /**
      * Return box campaigns items
      *
-     * @param $parentId
+     * @param int $parentId
      *
      * @return array
      */

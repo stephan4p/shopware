@@ -40,7 +40,7 @@ use Shopware\Models\Shop;
  * Additionally this class is used to build the configuration
  * inheritance for the backend module.
  *
- * @category  Shopware
+ * @category Shopware
  *
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
@@ -172,7 +172,7 @@ class Configurator
             if ($element instanceof Form\Interfaces\Container) {
                 $this->validateConfig($element);
 
-                //check Form\Field validation
+            //check Form\Field validation
             } elseif ($element instanceof Form\Interfaces\Validate) {
                 $element->validate();
             }
@@ -195,7 +195,7 @@ class Configurator
 
         $synchronized = [];
 
-        //iterates all configurations sets of the file system
+        // Iterates all configurations sets of the file system
         foreach ($collection as $item) {
             if (!$item instanceof ConfigSet) {
                 throw new \Exception(sprintf(
@@ -206,13 +206,13 @@ class Configurator
 
             $item->validate();
 
-            //check if this set is already defined, to prevent auto increment in the database.
+            // Check if this set is already defined, to prevent auto increment in the database.
             $existing = $this->getExistingConfigSet(
                 $template->getConfigSets(),
                 $item->getName()
             );
 
-            //if the set isn't defined, create a new one
+            // If the set isn't defined, create a new one
             if (!$existing instanceof Shop\TemplateConfig\Set) {
                 $existing = new Shop\TemplateConfig\Set();
                 $template->getConfigSets()->add($existing);
@@ -279,14 +279,14 @@ class Configurator
             'container' => $container,
         ]);
 
-        /** @var $layout Shop\TemplateConfig\Layout */
+        /** @var Shop\TemplateConfig\Layout $layout */
         foreach ($containers as $layout) {
             if (!in_array($layout->getName(), $structure['containers'])) {
                 $this->entityManager->remove($layout);
             }
         }
 
-        /** @var $layout Shop\TemplateConfig\Element */
+        /** @var Shop\TemplateConfig\Element $layout */
         foreach ($fields as $layout) {
             if (!in_array($layout->getName(), $structure['fields'])) {
                 $this->entityManager->remove($layout);
@@ -425,27 +425,25 @@ class Configurator
      * inheritance level becomes the same container instance passed into their
      * createConfig() function.
      *
-     * This allows the developer to display the theme configuration of extened
+     * This allows the developer to display the theme configuration of extended
      * themes.
      *
      * @param Theme                       $theme
      * @param Form\Container\TabContainer $container
-     *
-     * @return Form\Container\TabContainer
      */
     private function injectConfig(Theme $theme, Form\Container\TabContainer $container)
     {
-        //check if theme wants to inject parent configuration
-        if (!$theme->useInheritanceConfig() || $theme->getExtend() == null) {
+        // Check if theme wants to inject parent configuration
+        if (!$theme->useInheritanceConfig() || $theme->getExtend() === null) {
             return;
         }
 
-        /** @var $template Shop\Template */
+        /** @var Shop\Template $template */
         $template = $this->repository->findOneBy([
             'template' => $theme->getTemplate(),
         ]);
 
-        //no parent configured? cancel injection.
+        // No parent configured? cancel injection.
         if (!$template->getParent()) {
             return;
         }
@@ -467,13 +465,13 @@ class Configurator
      * @param Shop\TemplateConfig\Set[] $collection
      * @param string                    $name
      *
-     * @return Shop\TemplateConfig\Set
+     * @return Shop\TemplateConfig\Set|null
      */
     private function getExistingConfigSet($collection, $name)
     {
-        /** @var $item Shop\TemplateConfig\Set */
+        /** @var Shop\TemplateConfig\Set $item */
         foreach ($collection as $item) {
-            if ($item->getName() == $name) {
+            if ($item->getName() === $name) {
                 return $item;
             }
         }

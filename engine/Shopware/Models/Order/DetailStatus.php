@@ -22,7 +22,7 @@
  * our trademarks remain entirely with us.
  */
 
-namespace   Shopware\Models\Order;
+namespace Shopware\Models\Order;
 
 use Doctrine\ORM\Mapping as ORM;
 use Shopware\Components\Model\ModelEntity;
@@ -86,7 +86,7 @@ class DetailStatus extends ModelEntity
      *
      * @param string $description
      *
-     * @return Status
+     * @return DetailStatus
      */
     public function setDescription($description)
     {
@@ -110,7 +110,7 @@ class DetailStatus extends ModelEntity
      *
      * @param int $position
      *
-     * @return Status
+     * @return DetailStatus
      */
     public function setPosition($position)
     {
@@ -134,7 +134,7 @@ class DetailStatus extends ModelEntity
      *
      * @param int $mail
      *
-     * @return Status
+     * @return DetailStatus
      */
     public function setMail($mail)
     {

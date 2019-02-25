@@ -81,7 +81,7 @@ class ProductListingVariationLoader
      * @param Shop              $shop
      * @param ListProduct[]     $products
      * @param array             $configurations
-     * @param null|VariantFacet $variantFacet
+     * @param VariantFacet|null $variantFacet
      *
      * @return array
      */
@@ -148,7 +148,7 @@ class ProductListingVariationLoader
     /**
      * @param ListProduct[]     $products
      * @param array             $configurations
-     * @param null|VariantFacet $variantFacet
+     * @param VariantFacet|null $variantFacet
      *
      * @return array
      */
@@ -230,15 +230,15 @@ class ProductListingVariationLoader
 
         $c = $this->arrayCombinations(array_keys($consider));
 
-        //flip keys for later intersection
+        // Flip keys for later intersection
         $keys = array_flip(array_keys($consider));
 
         $result = [];
         foreach ($c as $combination) {
-            //flip combination to use key intersect
+            // Flip combination to use key intersect
             $combination = array_flip($combination);
 
-            //all options of groups will be combined together
+            // All options of groups will be combined together
             $full = array_intersect_key($groups, $combination);
 
             $first = array_intersect_key($groups, array_diff_key($keys, $combination));
@@ -247,7 +247,7 @@ class ProductListingVariationLoader
                 return $a->getId() > $b->getId();
             });
 
-            //create unique group key
+            // Create unique group key
             $groupKey = array_map(function (Group $group) {
                 return $group->getId();
             }, $full);
@@ -283,8 +283,8 @@ class ProductListingVariationLoader
     /**
      * Builds all possible combinations of an nested array
      *
-     * @param array   $groups
-     * @param Group[] $onlyFirst
+     * @param Group[] $groups
+     * @param int[]   $onlyFirst
      * @param array   $availability
      *
      * @return array
@@ -297,14 +297,14 @@ class ProductListingVariationLoader
 
         /** @var Group $group */
         foreach ($groups as $index => $group) {
-            //check if options of this group only be combined with the first element
+            // Check if options of this group only be combined with the first element
             $isFirst = in_array($group->getId(), $onlyFirst, true);
             $new = [];
 
             foreach ($result as $item) {
                 $options = array_values($group->getOptions());
 
-                //sort by ids ascending - forces always same order
+                // Sort by ids ascending - forces always same order
                 usort($options, function (Option $a, Option $b) {
                     return $a->getId() > $b->getId();
                 });
@@ -338,7 +338,7 @@ class ProductListingVariationLoader
 
                     $new[] = $tmp;
 
-                    //in case that options of this group should only combined with the first element, break combination loop
+                    // In case that options of this group should only combined with the first element, break combination loop
                     if ($isFirst) {
                         break;
                     }
@@ -388,7 +388,7 @@ class ProductListingVariationLoader
         $priceTable = $this->listingPriceHelper->getPriceTable($context);
         $priceTable->andWhere('defaultPrice.articledetailsID IN (:variants)');
 
-        $priceListingQuery->select('prices.`articledetailsID` as articledetailsID');
+        $priceListingQuery->select('DISTINCT prices.`articledetailsID` as articledetailsID');
         $priceListingQuery->addSelect('prices.`articleID` as articleID');
         $priceListingQuery->addSelect($this->listingPriceHelper->getSelection($context) . 'as price');
         $priceListingQuery->from('s_articles', 'product');
@@ -424,6 +424,7 @@ class ProductListingVariationLoader
         $subPriceQuery->from('s_articles_details', 'details');
         $subPriceQuery->leftJoin('details', '(' . $priceListingQuery . ')', 'prices', 'details.id = prices.articledetailsID');
         $subPriceQuery->leftJoin('details', '(' . $onSalePriceListingQuery . ')', 'onsalePriceList', 'details.id = onsalePriceList.articledetailsID');
+        $subPriceQuery->andWhere('details.id IN (:variants)');
 
         $query->innerJoin('availableVariant', '(' . $subPriceQuery . ')', 'prices', 'availableVariant.id = prices.articledetailsID');
 
@@ -499,7 +500,7 @@ class ProductListingVariationLoader
             $availabilityResult = [];
             foreach ($productAvailability as &$currentAvailability) {
                 $availabilityResult[$currentAvailability['variant_id']]['variant_id'] = (int) $currentAvailability['variant_id'];
-                $availabilityResult[$currentAvailability['variant_id']]['availability'] = $currentAvailability['availability'];
+                $availabilityResult[$currentAvailability['variant_id']]['availability'] = (bool) $currentAvailability['availability'];
 
                 $availabilityResult[$currentAvailability['variant_id']]['options'][] = (int) $currentAvailability['option_id'];
                 $availabilityResult[$currentAvailability['variant_id']]['groups'][] = (int) $currentAvailability['group_id'];

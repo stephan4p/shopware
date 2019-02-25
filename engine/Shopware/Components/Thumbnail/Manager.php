@@ -57,7 +57,7 @@ class Manager
     protected $rootDir;
 
     /**
-     * @var \Enlight_Event_EventManager
+     * @var \Enlight_Event_EventManager|null
      */
     protected $eventManager;
 
@@ -97,8 +97,10 @@ class Manager
      */
     public function createMediaThumbnail(Media $media, $thumbnailSizes = [], $keepProportions = false)
     {
+        $imagePath = $media->getPath();
+
         if ($media->getType() !== $media::TYPE_IMAGE) {
-            throw new \Exception('File is not an image.');
+            throw new \Exception(sprintf('File %s is not an image.', $imagePath));
         }
 
         if (empty($thumbnailSizes)) {
@@ -118,8 +120,6 @@ class Manager
         }
 
         $thumbnailSizes = $this->uniformThumbnailSizes($thumbnailSizes);
-
-        $imagePath = $media->getPath();
 
         $parameters = [
             'path' => $imagePath,
@@ -292,7 +292,7 @@ class Manager
      *
      * array('width' => 100, 'height' => 200)
      *
-     * @param $thumbnailSizes
+     * @param int[]|string[]|array<string[]>|array<int[]> $thumbnailSizes
      *
      * @return array
      */
@@ -311,7 +311,7 @@ class Manager
                 }
 
                 if (is_int($size)) {
-                    $size = ['width' => $size[0], 'height' => isset($size[1]) ? $size[1] : $size[0]];
+                    $size = ['width' => $size, 'height' => $size];
                 }
             }
         }
@@ -333,7 +333,7 @@ class Manager
      * Returns an array with width and height gained
      * from a string in a format like 100x200
      *
-     * @param $size
+     * @param string $size
      *
      * @return array
      */

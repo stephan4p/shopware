@@ -231,7 +231,7 @@ class VariantConditionWithPriceGroupTest extends TestCase
     /**
      * Get products and set the graduated prices and inStock of the variants.
      *
-     * @param $number
+     * @param string      $number
      * @param ShopContext $context
      * @param Category    $category
      * @param array       $data
@@ -345,18 +345,5 @@ class VariantConditionWithPriceGroupTest extends TestCase
             'customerGroupKey' => $group,
             'pseudoPrice' => $price + 10,
         ];
-    }
-
-    /**
-     * Sets the config value and refresh the shop.
-     *
-     * @param $name
-     * @param $value
-     */
-    private function setConfig($name, $value)
-    {
-        Shopware()->Container()->get('config_writer')->save($name, $value);
-        Shopware()->Container()->get('cache')->clean();
-        Shopware()->Container()->get('config')->setShop(Shopware()->Shop());
     }
 }

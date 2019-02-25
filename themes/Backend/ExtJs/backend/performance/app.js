@@ -27,9 +27,6 @@
  * @author shopware AG
  */
 
-/**
- * Shopware Application - Performance module
- */
 //{block name="backend/performance/application"}
 Ext.define('Shopware.apps.Performance', {
 
@@ -39,7 +36,7 @@ Ext.define('Shopware.apps.Performance', {
      * The name of the module. Used for internal purpose
      * @string
      */
-    name:'Shopware.apps.Performance',
+    name: 'Shopware.apps.Performance',
 
     /**
      * Requires controllers for sub-application
@@ -59,7 +56,7 @@ Ext.define('Shopware.apps.Performance', {
      * The detail controller knows all form field sets and the detail window component
      * @array
      */
-    views:[
+    views: [
         'main.Window',
         'main.Categories',
         'main.MultiRequestDialog',
@@ -84,11 +81,12 @@ Ext.define('Shopware.apps.Performance', {
         'tabs.settings.fields.Categories',
         'tabs.settings.fields.Various',
         'tabs.settings.fields.Customers',
+        'tabs.settings.fields.Sitemap',
 
         'tabs.settings.elements.BaseGrid',
         'tabs.settings.elements.CacheTime',
         'tabs.settings.elements.NoCache',
-        'tabs.settings.elements.MultiRequestButton'
+        'tabs.settings.elements.MultiRequestButton',
     ],
 
     /**
@@ -96,7 +94,7 @@ Ext.define('Shopware.apps.Performance', {
      * The other shops are global stores which used for combo boxes.
      * @array
      */
-    stores:[ 'Info', 'Shop', 'Config' ],
+    stores: [ 'Info', 'Shop', 'Config' ],
 
     /**
      * All store's required models. The detail store handles the base, billing, shipping and debit model.
@@ -113,7 +111,8 @@ Ext.define('Shopware.apps.Performance', {
         'Search',
         'Categories',
         'Various',
-        'Customer'
+        'Customer',
+        'Sitemap',
     ],
 
     bulkLoad: true,
@@ -138,7 +137,6 @@ Ext.define('Shopware.apps.Performance', {
             }
             return mainController.mainWindow;
         }
-
     }
 });
 //{/block}

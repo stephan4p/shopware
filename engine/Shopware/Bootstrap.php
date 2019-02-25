@@ -27,7 +27,7 @@ use Shopware\Components\DependencyInjection\Container;
 /**
  * @deprecated since 5.2 will be removed in 6.0
  *
- * @category  Shopware
+ * @category Shopware
  *
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
@@ -88,7 +88,7 @@ class Shopware_Bootstrap
      * @param string $name
      * @param mixed  $resource
      *
-     * @return Enlight_Bootstrap
+     * @return Shopware_Bootstrap
      */
     public function registerResource($name, $resource)
     {
@@ -182,7 +182,7 @@ class Shopware_Bootstrap
      *
      * @param string $name
      *
-     * @return Enlight_Bootstrap
+     * @return Shopware_Bootstrap
      */
     public function resetResource($name)
     {

@@ -48,7 +48,7 @@ Ext.define('Shopware.apps.Order.model.Order', {
     fields: [
         //{block name="backend/order/model/order/fields"}{/block}
         { name : 'id', type: 'int' },
-        { name : 'changed', type: 'date' },
+        { name : 'changed', type: 'date', dateFormat: 'c' },
         { name : 'number', type: 'string' },
         { name : 'customerId', type: 'int' },
         { name : 'customerEmail', type: 'string'},
@@ -92,6 +92,7 @@ Ext.define('Shopware.apps.Order.model.Order', {
         { name : 'partnerId', type: 'string' },
         { name : 'invoiceAmount', type: 'float' },
         { name : 'invoiceShipping', type: 'float' },
+        { name : 'invoiceShippingTaxRate', type: 'float' },
         { name : 'orderTime', type: 'date' },
         {
             name : 'invoiceShippingEuro',
@@ -130,6 +131,10 @@ Ext.define('Shopware.apps.Order.model.Order', {
                     return value;
                 }
             }
+        },
+        {
+            name: 'isProportionalCalculation',
+            type: 'boolean'
         }
     ],
 

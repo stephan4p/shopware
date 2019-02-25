@@ -68,6 +68,7 @@ class ComponentInstaller
         }
 
         $repo = $this->em->getRepository(Component::class);
+        /** @var Component|null $component */
         $component = $repo->findOneBy([
             'name' => $componentName,
             'pluginId' => $plugin->getId(),

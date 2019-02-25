@@ -110,7 +110,7 @@ class GarbageCollector
      */
     private function createTempTable()
     {
-        $this->connection->exec('CREATE TEMPORARY TABLE IF NOT EXISTS s_media_used (id int auto_increment, mediaId int NOT NULL, PRIMARY KEY pkid (id))');
+        $this->connection->exec('CREATE TEMPORARY TABLE IF NOT EXISTS s_media_used (id int auto_increment, mediaId int NOT NULL, PRIMARY KEY pkid (id), INDEX media (mediaId))');
     }
 
     /**
@@ -125,7 +125,7 @@ class GarbageCollector
             LEFT JOIN s_media_album a
             ON m.albumID = a.id
             SET albumID=-13
-            WHERE a.garbage_collectable = 1 
+            WHERE a.garbage_collectable = 1
             AND u.id IS NULL
         ';
         $this->connection->exec($sql);
@@ -223,6 +223,8 @@ class GarbageCollector
             preg_match_all("/{{1}media[\s+]?path=[\"'](?'mediaTag'\S*)[\"']}{1}/mi", $value, $mediaMatches);
             // Src tag matches
             preg_match_all("/<?img[^<]*src=[\"'](?'srcTag'[^{]*?)[\"'][^>]*\/?>?/mi", $value, $srcMatches);
+            // Link matches
+            preg_match_all("/<?a[^<]*href=[\"'](?'hrefTag'[^{]*?)[\"'][^>]*\/?>?/mi", $value, $hrefMatches);
 
             if ($mediaMatches['mediaTag']) {
                 foreach ($mediaMatches['mediaTag'] as $match) {
@@ -235,6 +237,17 @@ class GarbageCollector
                 foreach ($srcMatches['srcTag'] as $match) {
                     $match = $this->mediaService->normalize($match);
                     $this->addMediaByPath($match);
+                }
+            }
+
+            if ($hrefMatches['hrefTag']) {
+                foreach ($hrefMatches['hrefTag'] as $match) {
+                    $match = $this->mediaService->normalize($match);
+
+                    // Only add normalized media links and not arbitrary links
+                    if (strpos($match, 'media/') === 0) {
+                        $this->addMediaByPath($match);
+                    }
                 }
             }
         }
@@ -283,7 +296,7 @@ class GarbageCollector
     /**
      * Adds a media by path to used table
      *
-     * @param $path
+     * @param string $path
      */
     private function addMediaByPath($path)
     {
@@ -294,7 +307,7 @@ class GarbageCollector
     /**
      * Adds a media by id to used table
      *
-     * @param $mediaId
+     * @param int $mediaId
      */
     private function addMediaById($mediaId)
     {
@@ -313,7 +326,7 @@ class GarbageCollector
             $this->connection->executeQuery(
                 $sql,
                 [':mediaPaths' => $paths],
-                [':mediaPaths' => Connection::PARAM_INT_ARRAY]
+                [':mediaPaths' => Connection::PARAM_STR_ARRAY]
             );
         }
 

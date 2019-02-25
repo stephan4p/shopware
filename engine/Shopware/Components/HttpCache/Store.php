@@ -82,7 +82,7 @@ class Store extends BaseStore
             return false;
         }
 
-        /** @var $file \SplFileInfo */
+        /** @var \SplFileInfo $file */
         foreach ($this->createRecursiveFileIterator($this->root) as $file) {
             if (!$file->isFile()) {
                 continue;
@@ -110,7 +110,7 @@ class Store extends BaseStore
     public function purgeByHeader($name, $value = null)
     {
         // optimized purging for x-shopware-cache-id
-        if ($this->lookupOptimization && $name == 'x-shopware-cache-id') {
+        if ($this->lookupOptimization && $name === 'x-shopware-cache-id') {
             return $this->purgeByShopwareId($value);
         }
 
@@ -126,7 +126,7 @@ class Store extends BaseStore
 
         $result = false;
 
-        /** @var $headerFile \SplFileInfo */
+        /** @var \SplFileInfo $headerFile */
         foreach ($this->createRecursiveFileIterator($headerDir) as $headerFile) {
             if (!$headerFile->isFile()) {
                 continue;
@@ -202,8 +202,8 @@ class Store extends BaseStore
             // but save a lot of reads when invalidating
             $content[$cacheKey] = $headerKey;
 
-            if (!false === $this->save($key, json_encode($content))) {
-                throw new \RuntimeException("Could not write cacheKey $key");
+            if (!$this->save($key, json_encode($content))) {
+                throw new \RuntimeException(sprintf('Could not write cacheKey "%s"', $key));
             }
         }
 
@@ -315,7 +315,7 @@ class Store extends BaseStore
     /**
      * Delete all pages with the given cache id
      *
-     * @param $id
+     * @param int $id
      *
      * @return bool
      */

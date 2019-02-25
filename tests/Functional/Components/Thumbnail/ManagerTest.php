@@ -21,6 +21,7 @@
  * trademark license. Therefore any rights, title and interest in
  * our trademarks remain entirely with us.
  */
+
 class Shopware_Tests_Components_Thumbnail_ManagerTest extends \PHPUnit\Framework\TestCase
 {
     public function testManagerInstance()
@@ -151,7 +152,7 @@ class Shopware_Tests_Components_Thumbnail_ManagerTest extends \PHPUnit\Framework
 
     /**
      * @expectedException \Exception
-     * @expectedExceptionMessage File is not an image
+     * @expectedExceptionMessageRegExp /File .* is not an image/
      */
     public function testGenerationWithEmptyMedia()
     {

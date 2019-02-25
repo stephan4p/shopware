@@ -27,7 +27,7 @@ namespace Shopware\Bundle\StoreFrontBundle\Gateway\DBAL\Hydrator;
 use Shopware\Bundle\StoreFrontBundle\Struct;
 
 /**
- * @category  Shopware
+ * @category Shopware
  *
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
@@ -80,6 +80,10 @@ class CategoryHydrator extends Hydrator
             $category->setMedia(
                 $this->mediaHydrator->hydrate($data)
             );
+        }
+
+        if (isset($data['mediaTranslation'])) {
+            $category->setMedia($data['mediaTranslation']);
         }
 
         if ($data['__categoryAttribute_id']) {

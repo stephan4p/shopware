@@ -31,7 +31,7 @@ use Shopware\Models\Shop\Shop;
 /**
  * Shopware Plugin Namespace
  *
- * @category  Shopware
+ * @category Shopware
  *
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
@@ -222,7 +222,7 @@ class Shopware_Components_Plugin_Namespace extends Enlight_Plugin_Namespace_Conf
      *
      * @param Shopware_Components_Plugin_Bootstrap $bootstrap
      *
-     * @return bool
+     * @return bool|array
      */
     public function installPlugin(Shopware_Components_Plugin_Bootstrap $bootstrap)
     {
@@ -286,8 +286,8 @@ class Shopware_Components_Plugin_Namespace extends Enlight_Plugin_Namespace_Conf
             return $result;
         }
 
-        /** @var $plugin Shopware\Models\Plugin\Plugin */
-        /** @var $widget Shopware\Models\Widget\Widget */
+        /** @var Shopware\Models\Plugin\Plugin $plugin */
+        /** @var Shopware\Models\Widget\Widget $widget */
         foreach ($plugin->getWidgets() as $widget) {
             $name = $widget->getName();
             $db->insert('s_core_acl_privileges', [
@@ -308,7 +308,7 @@ class Shopware_Components_Plugin_Namespace extends Enlight_Plugin_Namespace_Conf
      *
      * @throws Exception
      *
-     * @return bool
+     * @return bool|array
      */
     public function uninstallPlugin(Shopware_Components_Plugin_Bootstrap $bootstrap, $removeData = true)
     {
@@ -435,7 +435,7 @@ class Shopware_Components_Plugin_Namespace extends Enlight_Plugin_Namespace_Conf
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      *
-     * @return bool
+     * @return bool|array
      */
     public function updatePlugin(Shopware_Components_Plugin_Bootstrap $plugin)
     {

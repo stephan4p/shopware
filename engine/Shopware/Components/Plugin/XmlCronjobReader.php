@@ -27,7 +27,11 @@ namespace Shopware\Components\Plugin;
 use Symfony\Component\Config\Util\XmlUtils;
 
 /**
- * Class XmlCronjobReader
+ * @deprecated This class will be removed in 5.6
+ *
+ * Use new class Shopware\Components\Plugin\XmlReader\XmlCronjobReader (see Shopware 5.6)
+ *
+ * https://github.com/shopware/shopware/blob/5.6/engine/Shopware/Components/Plugin/XmlReader/XmlCronjobReader.php
  */
 class XmlCronjobReader
 {
@@ -50,13 +54,15 @@ class XmlCronjobReader
     /**
      * @param \DOMDocument $xml
      *
-     * @return array
+     * @return array|void
      */
     private function parseInfo(\DOMDocument $xml)
     {
         $xpath = new \DOMXPath($xml);
 
-        if (false === $entries = $xpath->query('//cronjobs/cronjob')) {
+        /** @var \DOMNodeList|false $entries */
+        $entries = $xpath->query('//cronjobs/cronjob');
+        if ($entries === false) {
             return;
         }
 
@@ -88,9 +94,9 @@ class XmlCronjobReader
 
     /**
      * @param \DOMNode $node
-     * @param $name
+     * @param string   $name
      *
-     * @return null|string
+     * @return string|null
      */
     private function getFirstChild(\DOMNode $node, $name)
     {

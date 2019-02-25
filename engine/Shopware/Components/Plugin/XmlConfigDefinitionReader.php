@@ -26,12 +26,19 @@ namespace Shopware\Components\Plugin;
 
 use Symfony\Component\Config\Util\XmlUtils;
 
+/**
+ * @deprecated This class will be removed in 5.6
+ *
+ * Use new class Shopware\Components\Plugin\XmlReader\XmlConfigReader (see Shopware 5.6)
+ *
+ * https://github.com/shopware/shopware/blob/5.6/engine/Shopware/Components/Plugin/XmlReader/XmlConfigReader.php
+ */
 class XmlConfigDefinitionReader
 {
     /**
-     * @param $file string
+     * @param string $file
      *
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      *
      * @return array
      */
@@ -49,7 +56,7 @@ class XmlConfigDefinitionReader
     /**
      * @param \DOMDocument $xml
      *
-     * @return array
+     * @return array|void
      */
     private function parseForm(\DOMDocument $xml)
     {
@@ -67,18 +74,21 @@ class XmlConfigDefinitionReader
             $form['description'][$lang] = $description->nodeValue;
         }
 
-        if (false === $elemements = $xpath->query('//elements/element')) {
+        /** @var \DOMNodeList|false $elements */
+        $elements = $xpath->query('//elements/element');
+
+        if ($elements === false) {
             return;
         }
 
-        $elements = [];
+        $parsedElements = [];
 
         /* @var \DOMElement $entry */
-        foreach ($elemements as $elemement) {
-            $elements[] = $this->parseElement($elemement);
+        foreach ($elements as $element) {
+            $parsedElements[] = $this->parseElement($element);
         }
 
-        $form['elements'] = $elements;
+        $form['elements'] = $parsedElements;
 
         return $form;
     }
@@ -184,6 +194,9 @@ class XmlConfigDefinitionReader
             $labels = [];
             foreach ($this->getChildren($item, 'label') as $label) {
                 $lang = $label->getAttribute('lang') ?: 'en_GB';
+
+                // XSD Requires en-GB, Zend uses en_GB
+                $lang = str_replace('-', '_', $lang);
 
                 $mapping = ['de' => 'de_DE', 'en' => 'en_GB'];
                 if (array_key_exists($lang, $mapping)) {

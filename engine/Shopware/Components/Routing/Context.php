@@ -35,7 +35,7 @@ use Shopware_Components_Config as ShopwareConfig;
  * @see http://api.symfony.com/2.0/Symfony/Component/Routing/RequestContext.html
  * @see \Enlight_Controller_Request_Request
  *
- * @category  Shopware
+ * @category Shopware
  *
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
@@ -144,7 +144,7 @@ class Context implements \JsonSerializable
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getHost()
     {
@@ -152,7 +152,7 @@ class Context implements \JsonSerializable
     }
 
     /**
-     * @param string $host
+     * @param string|null $host
      */
     public function setHost($host)
     {
@@ -226,7 +226,7 @@ class Context implements \JsonSerializable
     }
 
     /**
-     * @return int
+     * @return int|null
      */
     public function getShopId()
     {
@@ -243,9 +243,9 @@ class Context implements \JsonSerializable
 
     /**
      * @param string     $name
-     * @param null|mixed $default
+     * @param mixed|null $default
      *
-     * @return null|mixed
+     * @return mixed|null
      */
     public function getParam($name, $default = null)
     {

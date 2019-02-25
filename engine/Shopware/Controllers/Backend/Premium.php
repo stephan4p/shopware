@@ -38,7 +38,8 @@ class Shopware_Controllers_Backend_Premium extends Shopware_Controllers_Backend_
     /**
      * @var \Shopware\Components\Model\ModelRepository
      */
-    protected $articleDetailRepository = null;
+    protected $articleDetailRepository;
+
     /**
      * @var Shopware\Models\Premium\Repository
      */
@@ -86,8 +87,8 @@ class Shopware_Controllers_Backend_Premium extends Shopware_Controllers_Backend_
     }
 
     /**
-     * Function to get all premium-articles and it's name and subshop-name
-     * Also used to enable the search of articles
+     * Function to get all premium-products and it's name and subshop-name
+     * Also used to enable the search of products
      */
     public function getPremiumArticlesAction()
     {
@@ -123,7 +124,7 @@ class Shopware_Controllers_Backend_Premium extends Shopware_Controllers_Backend_
     }
 
     /**
-     * Function to create a premium-article
+     * Function to create a premium-product
      *
      * @throws Exception
      */
@@ -153,19 +154,17 @@ class Shopware_Controllers_Backend_Premium extends Shopware_Controllers_Backend_
             $shop = Shopware()->Models()->find(Shop::class, $params['shopId']);
             $premiumModel->setShop($shop);
 
-            $articleDetail = $this->getArticleDetailRepository()->findOneBy(['number' => $params['orderNumber']]);
-            $premiumModel->setArticleDetail($articleDetail);
+            /** @var Detail $productVariant */
+            $productVariant = $this->getArticleDetailRepository()->findOneBy(['number' => $params['orderNumber']]);
+            $premiumModel->setArticleDetail($productVariant);
 
-            //If the article is already set as a premium-article
-            /**
-             * @var Shopware\Models\Premium\Premium
-             */
+            //If the product is already set as a premium-product
             $repository = Shopware()->Models()->getRepository(Premium::class);
             $result = $repository->findByOrderNumber($params['orderNumber']);
             $result = Shopware()->Models()->toArray($result);
 
             if (!empty($result) && $params['shopId'] == $result[0]['shopId']) {
-                $this->View()->assign(['success' => false, 'errorMsg' => 'The article is already a premium-article.']);
+                $this->View()->assign(['success' => false, 'errorMsg' => 'The product is already a premium-product.']);
 
                 return;
             }
@@ -183,7 +182,7 @@ class Shopware_Controllers_Backend_Premium extends Shopware_Controllers_Backend_
     }
 
     /**
-     * Function to update a premium-article
+     * Function to update a premium-product
      */
     public function editPremiumArticleAction()
     {
@@ -204,7 +203,7 @@ class Shopware_Controllers_Backend_Premium extends Shopware_Controllers_Backend_
             //Replace a comma with a dot
             $params['startPrice'] = str_replace(',', '.', $params['startPrice']);
 
-            /* @var $premiumModel Premium */
+            /* @var Premium $premiumModel */
             $premiumModel->fromArray($params);
 
             Shopware()->Models()->persist($premiumModel);
@@ -217,7 +216,7 @@ class Shopware_Controllers_Backend_Premium extends Shopware_Controllers_Backend_
     }
 
     /**
-     * Function to delete a single or multiple premium-article(s)
+     * Function to delete a single or multiple premium-product(s)
      */
     public function deletePremiumArticleAction()
     {
@@ -230,10 +229,7 @@ class Shopware_Controllers_Backend_Premium extends Shopware_Controllers_Backend_
             $repository = Shopware()->Models()->getRepository(Premium::class);
 
             $params = $this->Request()->getParams();
-            unset($params['module']);
-            unset($params['controller']);
-            unset($params['action']);
-            unset($params['_dc']);
+            unset($params['module'], $params['controller'], $params['action'], $params['_dc']);
 
             if ($params[0]) {
                 $data = [];
@@ -259,7 +255,7 @@ class Shopware_Controllers_Backend_Premium extends Shopware_Controllers_Backend_
     }
 
     /**
-     * Function to check if an article exists or is already added as a premium-article
+     * Function to check if an product exists or is already added as a premium-product
      */
     public function validateArticleAction()
     {
@@ -271,7 +267,7 @@ class Shopware_Controllers_Backend_Premium extends Shopware_Controllers_Backend_
             return;
         }
 
-        //If the article exists
+        //If the product exists
         $repository = Shopware()->Models()->getRepository(Detail::class);
         $result = $repository->findByNumber($value);
 
@@ -279,7 +275,7 @@ class Shopware_Controllers_Backend_Premium extends Shopware_Controllers_Backend_
             return;
         }
 
-        //If the article is already set as a premium-article
+        //If the product is already set as a premium-product
         $repository = Shopware()->Models()->getRepository(Premium::class);
         $result = $repository->findByOrderNumber($value);
 

@@ -24,7 +24,9 @@
 
 namespace Shopware\Bundle\BenchmarkBundle\Service;
 
-use Shopware\Models\Benchmark\BenchmarkConfig;
+use DateInterval;
+use Shopware\Bundle\BenchmarkBundle\Exception\TransmissionNotNecessaryException;
+use Shopware\Bundle\BenchmarkBundle\Struct\BenchmarkDataResult;
 use Shopware\Models\Benchmark\Repository as BenchmarkRepository;
 
 class BenchmarkStatisticsService
@@ -32,7 +34,7 @@ class BenchmarkStatisticsService
     /**
      * @var StatisticsService
      */
-    private $benchmark;
+    private $statistics;
 
     /**
      * @var BenchmarkRepository
@@ -40,52 +42,90 @@ class BenchmarkStatisticsService
     private $benchmarkRepository;
 
     /**
-     * @var \DateInterval
+     * @var DateInterval
      */
     private $interval;
 
     /**
      * @var BusinessIntelligenceService
      */
-    private $statistics;
+    private $biService;
 
     /**
-     * @param StatisticsService           $benchmark
      * @param BenchmarkRepository         $benchmarkRepository
-     * @param BusinessIntelligenceService $statistics
-     * @param \DateInterval|null          $interval
+     * @param StatisticsService           $statistics
+     * @param BusinessIntelligenceService $biService
+     * @param DateInterval|null           $interval
      *
      * @throws \Exception
      */
     public function __construct(
         BenchmarkRepository $benchmarkRepository,
-        StatisticsService $benchmark,
-        BusinessIntelligenceService $statistics,
-        \DateInterval $interval = null)
-    {
+        StatisticsService $statistics,
+        BusinessIntelligenceService $biService,
+        DateInterval $interval = null
+    ) {
         $this->benchmarkRepository = $benchmarkRepository;
-        $this->benchmark = $benchmark;
         $this->statistics = $statistics;
-        $this->interval = $interval ?: new \DateInterval('P1D');
+        $this->biService = $biService;
+        $this->interval = $interval ?: new DateInterval('P1D');
     }
 
-    public function sendBenchmarkData()
+    /**
+     * @return BenchmarkDataResult
+     */
+    public function handleTransmission()
     {
-        /** @var BenchmarkConfig $benchmarkConfig */
-        $benchmarkConfig = $this->benchmarkRepository->getMainConfig();
+        $statisticsResponse = $this->sendStatisticsData();
+        $biResponse = $this->fetchBenchmarkData();
 
-        $now = new \DateTime('now', new \DateTimeZone('UTC'));
+        return new BenchmarkDataResult($statisticsResponse, $biResponse);
+    }
 
-        if ($benchmarkConfig->isActive() &&
-            $benchmarkConfig->getLastReceived()->add($this->interval) > $now
-        ) {
-            $this->statistics->transmit();
+    private function sendStatisticsData()
+    {
+        // Configuration hasn't been done yet
+        if ($this->benchmarkRepository->getConfigsCount() === 0) {
+            return null;
         }
 
-        if ($benchmarkConfig->isActive() &&
-            $benchmarkConfig->getLastSent()->add($this->interval) > $now
-        ) {
-            $this->benchmark->transmit();
+        $this->benchmarkRepository->synchronizeShops();
+
+        $benchmarkConfig = $this->benchmarkRepository->getNextTransmissionShopConfig();
+
+        if (!$benchmarkConfig) {
+            return null;
         }
+
+        $this->benchmarkRepository->lockShop($benchmarkConfig->getShopId());
+
+        $statisticsResponse = null;
+
+        try {
+            $statisticsResponse = $this->statistics->transmit($benchmarkConfig, $benchmarkConfig->getBatchSize());
+            $statisticsResponse->setShopId((int) $benchmarkConfig->getShopId());
+        } catch (TransmissionNotNecessaryException $e) {
+            return null;
+        } finally {
+            $this->benchmarkRepository->unlockShop($benchmarkConfig->getShopId());
+        }
+
+        return $statisticsResponse;
+    }
+
+    private function fetchBenchmarkData()
+    {
+        $biResponse = null;
+
+        $benchmarkConfig = $this->benchmarkRepository->getNextReceivingShopConfig();
+
+        if (!$benchmarkConfig) {
+            return null;
+        }
+
+        $biResponse = $this->biService->transmit($benchmarkConfig);
+        $biResponse->setShopId((int) $benchmarkConfig->getShopId());
+
+        return $biResponse;
     }
 }

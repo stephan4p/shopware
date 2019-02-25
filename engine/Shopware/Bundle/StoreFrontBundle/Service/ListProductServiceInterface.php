@@ -27,7 +27,7 @@ namespace Shopware\Bundle\StoreFrontBundle\Service;
 use Shopware\Bundle\StoreFrontBundle\Struct;
 
 /**
- * @category  Shopware
+ * @category Shopware
  *
  * @copyright Copyright (c) shopware AG (http://www.shopware.de)
  */
@@ -53,7 +53,7 @@ interface ListProductServiceInterface
      * @param string                         $number
      * @param Struct\ProductContextInterface $context
      *
-     * @return Struct\ListProduct
+     * @return Struct\ListProduct|null
      */
     public function get($number, Struct\ProductContextInterface $context);
 }
