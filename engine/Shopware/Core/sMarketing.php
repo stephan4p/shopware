@@ -693,7 +693,7 @@ class sMarketing
 
         $sql = 'SELECT id, ordernumber, additionaltext
             FROM s_articles_details
-            WHERE articleID = :articleId AND kind != 3';
+            WHERE articleID = :articleId AND kind != 3 AND active = 1 AND (laststock = 0 OR laststock = 1 AND instock > 0)';
 
         $products = [];
         $variantsData = Shopware()->Db()->fetchAll(
